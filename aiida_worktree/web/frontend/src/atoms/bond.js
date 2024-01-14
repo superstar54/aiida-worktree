@@ -5,7 +5,7 @@ import {elementColors } from './atoms_data.js';
 
 export function drawBonds(scene, atoms) {
     const bonds = calculateBonds(atoms);
-    const radius = 0.05; // Radius of the cylinder
+    const radius = 0.15; // Radius of the cylinder
 
 
     bonds.forEach(([index1, index2]) => {

@@ -59,3 +59,27 @@ export function createCylinderBetweenPoints(point1, point2, radius, material1, m
 
     return bondGroup;
 }
+
+export function clearObjects(scene) {
+    // Clone the children array since we'll be modifying it as we go
+    const children = [...scene.children];
+
+    children.forEach(child => {
+        // Check if the object is not a camera or a light
+        if (!(child instanceof THREE.Camera) && !(child instanceof THREE.Light)) {
+            scene.remove(child);
+
+            // Dispose geometry and material if they exist
+            if (child.geometry) {
+                child.geometry.dispose();
+            }
+            if (child.material) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(material => material.dispose());
+                } else {
+                    child.material.dispose();
+                }
+            }
+        }
+    });
+}

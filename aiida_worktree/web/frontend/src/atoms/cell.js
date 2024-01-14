@@ -1,6 +1,5 @@
 import * as THREE from 'three';
-import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
-
+import {createLabel} from './draw_label.js';
 
 
 export function drawUnitCell(scene, cell) {
@@ -45,19 +44,7 @@ export function drawUnitCell(scene, cell) {
     scene.add(line);
 }
 
-function createLabel(text, position, color = 'black') {
-    const labelDiv = document.createElement('div');
-    labelDiv.className = 'axis-label';
-    labelDiv.textContent = text;
-    labelDiv.style.marginTop = '-1em';
-    labelDiv.style.color = color;
-    labelDiv.style.fontSize = '20px';
 
-    const label = new CSS2DObject(labelDiv);
-    label.position.copy(position);
-
-    return label;
-}
 
 export function drawUnitCellVectors(scene, cell) {
     if (!cell || cell.length !== 9) {

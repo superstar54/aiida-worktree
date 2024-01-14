@@ -7,6 +7,8 @@ import { drawBonds } from './bond.js';
 import { drawAtoms } from './draw_atoms.js';
 import { createViewpointButtons } from './viewpoint.js';
 import { setupCameraGUI } from './camera.js';
+import { clearObjects } from './utils.js';
+import { drawAtomLabels } from './draw_label.js';
 
 class AtomsViewer {
     constructor(containerElement, atoms) {
@@ -120,8 +122,54 @@ class AtomsViewer {
         this.scene.add(this.label);
     }
 
+    updateLabels(value) {
+        // Handle the logic to draw labels based on the selected option
+        if (value === 'none') {
+            this.atomLabels = drawAtomLabels(this.scene, this.atoms, 'none', this.atomLabels);
+            // Remove labels
+        } else if (value === 'symbol') {
+            // Draw labels with symbols
+            this.atomLabels = drawAtomLabels(this.scene, this.atoms, 'symbol', this.atomLabels);
+        } else if (value === 'index') {
+            // Draw labels with indices
+            this.atomLabels = drawAtomLabels(this.scene, this.atoms, 'index', this.atomLabels);
+        }
+        console.log("this.atomLabels: ", this.atomLabels)
+    }
+
+    changeVizType( value ) {
+
+        clearObjects(this.scene);
+
+        drawUnitCell(this.scene, this.atoms.cell);
+        drawUnitCellVectors(this.scene, this.atoms.cell, this.camera);
+
+
+        if ( value == 0 ) {
+            console.log("value: ", value)
+            console.log("this.scene: ", this.scene)
+            console.log("this.atoms: ", this.atoms)
+            drawAtoms(this.scene, this.atoms, 1);
+        }
+        else if ( value == 1 ){
+            drawAtoms(this.scene, this.atoms, 0.4);
+            drawBonds(this.scene, this.atoms);
+        }
+        else {
+            drawBonds(this.scene, this.atoms);
+        }
+
+    }
 
     init() {
+		this.objects = [];
+        this.atomLabels = [];
+        this.VIZ_TYPE = {
+            'Ball': 0,
+            'Ball + Stick': 1,
+            'Stick': 2,
+        };
+        this.labelType = 'none'; // Default label type
         // Initialize Three.js scene, camera, and renderer
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(25, this.containerElement.clientWidth / this.containerElement.clientHeight, 0.1, 100);
@@ -146,9 +194,14 @@ class AtomsViewer {
 
         // Initialize the GUI inside the div element
         const gui = new GUI(); // Create a new dat.GUI instance
+        guiContainer.appendChild(gui.domElement);
 
         // Append the dat.GUI's DOM element to container
-        guiContainer.appendChild(gui.domElement);
+        const atomsFolder = gui.addFolder('Atoms');
+		atomsFolder.add( {vizType: 1,}, 'vizType', this.VIZ_TYPE ).onChange( this.changeVizType.bind(this) ).name("Model Style");
+        // Add Label Type Controller
+        atomsFolder.add(this, 'labelType', ['none', 'symbol', 'index']).onChange(this.updateLabels.bind(this)).name('Atom Label');
+        // Add camera controls
         createViewpointButtons(gui, this.camera)
         setupCameraGUI(gui, this.camera, this.scene)
         //
@@ -168,11 +221,14 @@ class AtomsViewer {
 
 
         // Add lighting
-        const pointLight = new THREE.PointLight(0xFFFFFF, 1, 1000);
-        pointLight.position.set(1, 1, 1);
-        this.scene.add(pointLight);
+		const light1 = new THREE.DirectionalLight( 0xffffff, 2.5 );
+        light1.position.set(1, 1, 1);
+        this.scene.add(light1);
+        const light2 = new THREE.DirectionalLight( 0xffffff, 1.5 );
+        light2.position.set(-1, -1, 1);
+        this.scene.add(light2);
 
-        const ambientLight = new THREE.AmbientLight(0x404040, 20); // Soft white light
+        const ambientLight = new THREE.AmbientLight(0x404040, 10); // Soft white light
         this.scene.add(ambientLight);
 
         // OrbitControls for camera movement
@@ -190,8 +246,7 @@ class AtomsViewer {
         // Draw bonds
         drawBonds(this.scene, this.atoms);
 
-        // this.updateAtomLabels();
-
+        drawAtomLabels(this.scene, this.atoms, 'none', this.atomLabels);
 
         // Set camera position
         this.camera.position.z = 5;
