@@ -58,6 +58,7 @@ class AtomsViewer {
         // Check for intersections with atom meshes
         const atomMeshes = Object.values(this.instancedMeshes);
         const intersects = raycaster.intersectObjects(atomMeshes);
+        // console.log("intersects: ", intersects)
         // Check if there are intersections
         if (intersects.length > 0) {
             // Get the first intersected object (atom)

@@ -1,41 +1,36 @@
-// AtomsItem.js
+/// AtomsItem.js
 
-import React, { useEffect } from 'react';
-import {Atom, Atoms } from '../atoms/atoms.js';
+import React, { useEffect, useRef } from 'react';
+import { Atoms } from '../atoms/atoms.js';
 import AtomsViewer from '../atoms/atoms_three.js';
-import { parseXYZ } from '../atoms/parser_xyz.js';
 
-function AtomsItem() {
+function AtomsItem({ data }) {
+  const atomsContainerRef = useRef(null);
+
   useEffect(() => {
-    // Your non-React code goes here
+    console.log("data: ", data)
+    const atoms = new Atoms(data);
+    console.log(atoms);
 
-    // Create an instance of Atoms and add atoms as needed
-    // Usage example
-    const xyzData = `
-    3
-    Water molecule
-    O 1.0 1.0 1.0
-    H 1.0 0.3 1.0
-    H 1.0 1.7 1.0
-    `;
+    if (atomsContainerRef.current) {
+      // Create an instance of AtomsViewer and pass the Atoms object to it
+      const viewer = new AtomsViewer(atomsContainerRef.current, atoms);
 
-    const atoms = parseXYZ(xyzData);
-    atoms.setCell([3, 3, 3]);
-    let atoms1 = atoms.multiply(1, 1, 1);
-    console.log(atoms1)
-    const containerElement = document.getElementById('atoms');
+      // Call the render method to start the visualization
+      viewer.render();
 
-    // Create an instance of AtomsViewer and pass the Atoms object to it
-    const viewer = new AtomsViewer(containerElement, atoms1);
-
-    // Call the render method to start the visualization
-    viewer.render();
-  }, []);
+      // Cleanup function to be called when the component unmounts
+      return () => {
+        // Assuming AtomsViewer provides a cleanup or destroy method
+        // viewer.destroy();
+      };
+    }
+  }, [data]); // Include data in the dependency array
 
   return (
     <div>
       <h1>Atoms Viewer</h1>
-      <div id="atoms" style={{position: "relative", width: '600px', height: '600px' }}></div>
+      <div ref={atomsContainerRef} style={{ position: "relative", width: '600px', height: '600px' }}></div>
     </div>
   );
 }

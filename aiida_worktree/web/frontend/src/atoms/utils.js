@@ -8,8 +8,8 @@ export function calculateBonds(atoms) {
             const index1 = i;
             const index2 = j;
 
-            const species1 = atoms.species[atoms.speciesIndices[index1]].symbol;
-            const species2 = atoms.species[atoms.speciesIndices[index2]].symbol;
+            const species1 = atoms.species[atoms.speciesArray[index1]].symbol;
+            const species2 = atoms.species[atoms.speciesArray[index2]].symbol;
 
             const pos1 = new Float32Array(atoms.positions[index1]);
             const pos2 = new Float32Array(atoms.positions[index2]);
@@ -20,8 +20,8 @@ export function calculateBonds(atoms) {
                 Math.pow(pos1[2] - pos2[2], 2)
             );
 
-            const radius1 = covalentRadii[species1] || 1;
-            const radius2 = covalentRadii[species2] || 1;
+            const radius1 = covalentRadii[species1]*1.1 || 1;
+            const radius2 = covalentRadii[species2]*1.1 || 1;
             if (distance < radius1 + radius2) {
                 bonds.push([i, j]);
             }

@@ -39,24 +39,33 @@ async def read_data_node_item(id: int):
         node = orm.load_node(id)
         content = {}
         if isinstance(node, orm.Int):
-            content["type"] = "Int"
+            content["node_type"] = "Int"
             content["value"] = node.value
         elif isinstance(node, orm.Float):
-            content["type"] = "Float"
+            content["node_type"] = "Float"
             content["value"] = node.value
         elif isinstance(node, orm.Str):
-            content["type"] = "Str"
+            content["node_type"] = "Str"
             content["value"] = node.value
         elif isinstance(node, orm.Bool):
-            content["type"] = "Bool"
+            content["node_type"] = "Bool"
             content["value"] = node.value
         elif isinstance(node, orm.StructureData):
-            content["type"] = "StructureData"
+            content["node_type"] = "StructureData"
             atoms = node.get_ase()
-            content["cell"] = atoms.cell.tolist()
+            content["cell"] = atoms.cell.flatten().tolist()
             content["pbc"] = atoms.pbc.tolist()
             content["positions"] = atoms.positions.tolist()
-            content["species"] = atoms.get_chemical_symbols()
+            numbers = atoms.get_atomic_numbers()
+            symbols = atoms.get_chemical_symbols()
+            content["species"] = {}
+            content["speciesArray"] = symbols
+            for i in range(len(numbers)):
+                if symbols[i] not in content["species"]:
+                    content["species"][symbols[i]] = {
+                        "atomicNumber": int(numbers[i]),
+                        "symbol": symbols[i],
+                    }
         return content
     except KeyError:
         raise HTTPException(status_code=404, detail=f"Data node {id} not found")

@@ -8,20 +8,47 @@ class Species {
 }
 
 class Atom {
-    constructor(speciesIndex, position) {
-        this.speciesIndex = speciesIndex; // Index of the species in the species array
+    constructor(species, position) {
+        this.species = species; // Index of the species in the species array
         this.position = new Float32Array(position); // Position of the atom as a Float32Array
     }
 }
 
 class Atoms {
-    constructor() {
-        this.species = [];     // Array to store Species objects
-        this.speciesIndices = []; // New array to store species indices
-        this.positions = [];   // Typed array for atom positions [speciesIndex1, x1, y1, z1, speciesIndex2, x2, y2, z2, ...]
-        this.cell = null;      // 3x3 matrix for unit cell dimensions (default: null)
-        this.pbc = [true, true, true]; // Array for periodic boundary conditions (default: true in all dimensions)
-        this.properties = {};  // Object for additional properties (e.g., charge, mass, etc.)
+    constructor(data = null) {
+        this.species = {};
+        this.speciesArray = [];
+        this.positions = [];
+        this.cell = null;
+        this.pbc = [true, true, true];
+        this.properties = {};
+
+        if (data) {
+            this.initializeFromData(data);
+        }
+    }
+
+    initializeFromData(data) {
+        if (data.cell) {
+            this.setCell(data.cell);
+        }
+        if (data.pbc) {
+            this.setPBC(data.pbc);
+        }
+        if (data.species && typeof data.species === 'object') {
+            // Iterate over each key-value pair in the species dictionary
+            Object.entries(data.species).forEach(([symbol, atomicNumber]) => {
+                this.addSpecies(symbol, atomicNumber);
+            });
+        }
+        if (data.speciesArray && data.positions) {
+            for (let i = 0; i < data.speciesArray.length; i++) {
+                const speciesIndex = data.speciesArray[i];
+                const position = data.positions[i];
+                this.addAtom(new Atom(speciesIndex, position));
+            }
+        }
+        // Initialize other properties if needed
     }
 
     setCell(cell) {
@@ -66,14 +93,19 @@ class Atoms {
     }
 
     addSpecies(symbol, atomicNumber) {
-        // Create a new Species and add it to the list
-        this.species.push(new Species(symbol, atomicNumber));
+        // Create a new Species and add it to the species object
+        if (!this.species[symbol]) {
+            this.species[symbol] = new Species(symbol, atomicNumber);
+        }
     }
 
     addAtom(atom) {
         // Add an atom to the atoms
+        if (!this.species[atom.species]) {
+            throw new Error(`Species with index ${atom.species} not found.`);
+        }
         this.positions.push(atom.position);
-        this.speciesIndices.push(atom.speciesIndex);
+        this.speciesArray.push(atom.species);
     }
 
     removeAtom(index) {
@@ -135,7 +167,7 @@ class Atoms {
             for (let iy = 0; iy < my; iy++) {
                 for (let iz = 0; iz < mz; iz++) {
                     for (let i = 0; i < this.getAtomsCount(); i++) {
-                        const speciesIndex = this.speciesIndices[i];
+                        const species = this.speciesArray[i];
                         const [x, y, z] = this.positions[i];
 
                         // Calculate new position considering the unit cell dimensions
@@ -144,7 +176,7 @@ class Atoms {
                         const newZ = z + iz * this.cell[8];
 
                         // Add the new atom to the newAtoms
-                        newAtoms.addAtom(new Atom(speciesIndex, [newX, newY, newZ]));
+                        newAtoms.addAtom(new Atom(species, [newX, newY, newZ]));
                     }
                 }
             }

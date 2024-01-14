@@ -11,8 +11,8 @@ export function drawBonds(scene, atoms) {
     bonds.forEach(([index1, index2]) => {
         const position1 = new THREE.Vector3(...atoms.positions[index1]);
         const position2 = new THREE.Vector3(...atoms.positions[index2]);
-        const color1 = new THREE.Color(elementColors[atoms.species[atoms.speciesIndices[index1]].symbol]);
-        const color2 = new THREE.Color(elementColors[atoms.species[atoms.speciesIndices[index2]].symbol]);
+        const color1 = new THREE.Color(elementColors[atoms.species[atoms.speciesArray[index1]].symbol]);
+        const color2 = new THREE.Color(elementColors[atoms.species[atoms.speciesArray[index2]].symbol]);
         const material1 = new THREE.MeshPhongMaterial({ color: color1 }); // First color
         const material2 = new THREE.MeshPhongMaterial({ color: color2 }); // Second color
 

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import AtomsItem from './AtomsItem.js'; // Adjust the path as necessary
+
 import './DataNodeItem.css';
 import '../App.css';
 
 function DataNodeItem() {
   const { pk } = useParams();
-  const [NodeData, setNodeData] = useState({ summary: {}, nodes: {}, links: [], logs: [], pk: [] });
+  const [NodeData, setNodeData] = useState({ node_type: "" });
 
   useEffect(() => {
     fetch(`http://localhost:8000/api/datanode/${pk}`)
@@ -42,6 +44,7 @@ function DataNodeItem() {
           ))}
         </tbody>
       </table>
+      {NodeData.node_type === 'StructureData' && <AtomsItem data={NodeData} />}
     </div>
   );
 }

@@ -1,14 +1,14 @@
 import * as THREE from 'three';
-import {covalentRadii, elementColors } from './atoms_data.js';
+import { covalentRadii, elementColors } from './atoms_data.js';
 
 export function drawAtoms(scene, atoms) {
     // Create instanced meshes for each species
     let instancedMeshes = {};
-    atoms.species.forEach((species, speciesIndex) => {
-        const radius = covalentRadii[species.symbol] || 1;
-        const atomGeometry = new THREE.SphereGeometry(radius/4, 32, 32);
+    Object.entries(atoms.species).forEach(([symbol, species], speciesIndex) => {
+        const radius = covalentRadii[symbol] || 1;
+        const atomGeometry = new THREE.SphereGeometry(radius / 4, 32, 32);
         const defaultColor = 0xffffff;
-        const color = species.symbol in elementColors ? elementColors[species.symbol] : defaultColor;
+        const color = symbol in elementColors ? elementColors[symbol] : defaultColor;
         const sphereMaterial = new THREE.MeshPhongMaterial({
             color: color,
             specular: 0x111111,
@@ -16,30 +16,31 @@ export function drawAtoms(scene, atoms) {
         });
 
         // Count how many atoms of species there are
-        const count = atoms.speciesIndices.filter(index => index === speciesIndex).length;
+        const count = atoms.speciesArray.filter(index => atoms.species[index].symbol === symbol).length;
         const instancedMesh = new THREE.InstancedMesh(atomGeometry, sphereMaterial, count);
         // Set userData for the instanced mesh to identify it as an atom
         instancedMesh.userData.type = 'atom';
-        instancedMesh.userData.symbol = species.symbol;
-        instancedMeshes[speciesIndex] = instancedMesh;
+        instancedMesh.userData.symbol = symbol;
+        instancedMeshes[symbol] = instancedMesh;
         scene.add(instancedMesh);
     });
 
     // Position each atom in the instanced meshes
     const speciesInstanceIndices = {};
-    atoms.speciesIndices.forEach((speciesIndex, globalIndex) => {
-        if (!(speciesIndex in speciesInstanceIndices)) {
-            speciesInstanceIndices[speciesIndex] = 0;
+    atoms.speciesArray.forEach((symbol, globalIndex) => {
+        if (!(symbol in speciesInstanceIndices)) {
+            speciesInstanceIndices[symbol] = 0;
         }
 
-        const instancedMesh = instancedMeshes[speciesIndex];
+        const instancedMesh = instancedMeshes[symbol];
         const position = new THREE.Vector3(...atoms.positions[globalIndex]);
         const dummy = new THREE.Object3D();
         dummy.position.copy(position);
         dummy.updateMatrix();
 
-        instancedMesh.setMatrixAt(speciesInstanceIndices[speciesIndex], dummy.matrix);
-        speciesInstanceIndices[speciesIndex]++;
+        instancedMesh.setMatrixAt(speciesInstanceIndices[symbol], dummy.matrix);
+        speciesInstanceIndices[symbol]++;
     });
+
     return instancedMeshes;
 }
