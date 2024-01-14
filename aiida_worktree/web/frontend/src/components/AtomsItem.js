@@ -2,22 +2,29 @@
 
 import React, { useEffect, useRef } from 'react';
 import { Atoms } from '../atoms/atoms.js';
-import AtomsViewer from '../atoms/atoms_three.js';
+import AtomsViewer from '../atoms/atoms_viewer.js';
+import { BlendJS } from '../atoms/blendjs.js';
 
 function AtomsItem({ data }) {
   const atomsContainerRef = useRef(null);
 
   useEffect(() => {
+
     console.log("data: ", data)
     const atoms = new Atoms(data);
-    console.log(atoms);
 
     if (atomsContainerRef.current) {
+      const bjs = new BlendJS(atomsContainerRef.current);
       // Create an instance of AtomsViewer and pass the Atoms object to it
-      const viewer = new AtomsViewer(atomsContainerRef.current, atoms);
+      const avr = new AtomsViewer(bjs, atoms);
+      atoms.translate([3, 3, 3]);
+      atoms.setCell([10, 10, 10]);
+      console.log("atoms: ", atoms)
+      const avr1 = new AtomsViewer(bjs, atoms);
+
 
       // Call the render method to start the visualization
-      viewer.render();
+      bjs.render();
 
       // Cleanup function to be called when the component unmounts
       return () => {

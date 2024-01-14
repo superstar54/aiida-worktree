@@ -60,11 +60,16 @@ export function createCylinderBetweenPoints(point1, point2, radius, material1, m
     return bondGroup;
 }
 
-export function clearObjects(scene) {
+export function clearObjects(scene, uuid=null) {
     // Clone the children array since we'll be modifying it as we go
     const children = [...scene.children];
 
     children.forEach(child => {
+        // If uuid is specified, only remove objects with matching uuid
+        if (uuid !== null && (!child.userData || child.userData.uuid !== uuid)) {
+            return; // Skip this object
+        }
+
         // Check if the object is not a camera or a light
         if (!(child instanceof THREE.Camera) && !(child instanceof THREE.Light)) {
             scene.remove(child);

@@ -2,7 +2,9 @@ import * as THREE from 'three';
 import {createLabel} from './draw_label.js';
 
 
-export function drawUnitCell(scene, cell) {
+export function drawUnitCell(scene, atoms) {
+    console.log("atoms cell: ", atoms)
+    const cell = atoms.cell;
     if (!cell || cell.length !== 9) {
         console.warn("Invalid or missing unit cell data");
         return;
@@ -41,6 +43,8 @@ export function drawUnitCell(scene, cell) {
 
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
     const line = new THREE.LineSegments(geometry, material);
+    line.userData.type = 'cell';
+    line.userData.uuid = atoms.uuid;
     scene.add(line);
 }
 

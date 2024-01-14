@@ -17,6 +17,9 @@ export function drawBonds(scene, atoms) {
         const material2 = new THREE.MeshPhongMaterial({ color: color2 }); // Second color
 
         const bondMesh = createCylinderBetweenPoints(position1, position2, radius, material1, material2);
+        bondMesh.userData.type = 'bond';
+        bondMesh.userData.symbol = index1 + '-' + index2;
+        bondMesh.userData.uuid = atoms.uuid;
         scene.add(bondMesh);
     });
 }

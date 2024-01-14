@@ -189,6 +189,86 @@ class Atoms {
         return newAtoms;
     }
 
+    translate(t) {
+        for (let i = 0; i < this.positions.length; i++) {
+            this.positions[i][0] += t[0]; // Shift x-coordinate
+            this.positions[i][1] += t[1]; // Shift y-coordinate
+            this.positions[i][2] += t[2]; // Shift z-coordinate
+        }
+    }
+
+    rotate(axis, angle, rotate_cell = false) {
+        const angleRad = (angle * Math.PI) / 180;
+        const norm = Math.sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
+        const [u, v, w] = [axis[0] / norm, axis[1] / norm, axis[2] / norm]; // Normalized axis components
+
+        // Rodrigues' rotation formula components
+        const cosA = Math.cos(angleRad);
+        const sinA = Math.sin(angleRad);
+        const matrix = [
+            cosA + u * u * (1 - cosA),         u * v * (1 - cosA) - w * sinA, u * w * (1 - cosA) + v * sinA,
+            v * u * (1 - cosA) + w * sinA,     cosA + v * v * (1 - cosA),     v * w * (1 - cosA) - u * sinA,
+            w * u * (1 - cosA) - v * sinA,     w * v * (1 - cosA) + u * sinA, cosA + w * w * (1 - cosA)
+        ];
+
+        for (let i = 0; i < this.positions.length; i++) {
+            const [x, y, z] = this.positions[i];
+            this.positions[i][0] = matrix[0] * x + matrix[1] * y + matrix[2] * z;
+            this.positions[i][1] = matrix[3] * x + matrix[4] * y + matrix[5] * z;
+            this.positions[i][2] = matrix[6] * x + matrix[7] * y + matrix[8] * z;
+        }
+
+        if (rotate_cell && this.cell) {
+            const newCell = new Float32Array(9);
+            for (let i = 0; i < 3; i++) {
+                const cellVec = [this.cell[i * 3], this.cell[i * 3 + 1], this.cell[i * 3 + 2]];
+                newCell[i * 3] = matrix[0] * cellVec[0] + matrix[1] * cellVec[1] + matrix[2] * cellVec[2];
+                newCell[i * 3 + 1] = matrix[3] * cellVec[0] + matrix[4] * cellVec[1] + matrix[5] * cellVec[2];
+                newCell[i * 3 + 2] = matrix[6] * cellVec[0] + matrix[7] * cellVec[1] + matrix[8] * cellVec[2];
+            }
+            this.cell = newCell;
+        }
+    }
+
+    center(vacuum=null, axis=(0, 1, 2), about=null) {
+        if (!this.cell) {
+            throw new Error("Cell is not defined.");
+        }
+
+        // Calculate current center of mass or geometry
+        let centerOfMass = [0, 0, 0];
+        for (let i = 0; i < this.positions.length; i++) {
+            centerOfMass[0] += this.positions[i][0];
+            centerOfMass[1] += this.positions[i][1];
+            centerOfMass[2] += this.positions[i][2];
+        }
+        centerOfMass = centerOfMass.map(x => x / this.positions.length);
+
+        // Determine target center point
+        let targetCenter = [0, 0, 0];
+        if (about) {
+            targetCenter = about;
+        } else {
+            for (let i = 0; i < 3; i++) {
+                if (axis.includes(i)) {
+                    targetCenter[i] = this.cell[i * 3 + i] / 2;
+                }
+            }
+        }
+
+        // Translate atoms to the target center
+        const translationVector = targetCenter.map((x, i) => x - centerOfMass[i]);
+        this.translate(...translationVector);
+
+        // Adjust cell size if vacuum padding is specified
+        if (vacuum !== null) {
+            for (let i = 0; i < 3; i++) {
+                if (axis.includes(i)) {
+                    this.cell[i * 3 + i] += 2 * vacuum; // Increase the cell dimension
+                }
+            }
+        }
+    }
 
 }
 

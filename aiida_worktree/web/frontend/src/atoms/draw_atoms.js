@@ -21,6 +21,7 @@ export function drawAtoms(scene, atoms, scale=0.4) {
         // Set userData for the instanced mesh to identify it as an atom
         instancedMesh.userData.type = 'atom';
         instancedMesh.userData.symbol = symbol;
+        instancedMesh.userData.uuid = atoms.uuid;
         instancedMeshes[symbol] = instancedMesh;
         scene.add(instancedMesh);
     });
