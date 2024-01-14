@@ -7,26 +7,28 @@ router = APIRouter()
 @router.get("/api/datanode-data")
 async def read_datanode_data(search: str = Query(None)):
     from aiida.orm import QueryBuilder, Data
+    from aiida_worktree.web.backend.app.utils import time_ago
 
     try:
         builder = QueryBuilder()
         builder.append(
             Data,
             filters={"node_type": {"like": f"%{search}%"}} if search else None,
+            project=["id", "uuid", "ctime", "node_type", "label"],
             tag="data",
         )
 
         records = builder.all()
-        data = []
-        for r in records:
-            data.append(
-                {
-                    "pk": r[0].pk,
-                    "uuid": r[0].uuid,
-                    "ctime": r[0].ctime,
-                    "node_type": r[0].node_type,
-                }
-            )
+        data = [
+            {
+                "pk": pk,
+                "uuid": uuid,
+                "ctime": time_ago(ctime),
+                "node_type": node_type,
+                "label": label,
+            }
+            for pk, uuid, ctime, node_type, label in records
+        ]
         return data
     except KeyError:
         raise HTTPException(status_code=404, detail=f"Data node {id} not found")

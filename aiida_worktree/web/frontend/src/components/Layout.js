@@ -15,7 +15,6 @@ const Layout = ({ children }) => {
             <li><Link to="/worktree"><FontAwesomeIcon icon={faTree} /><span>WorkTree</span></Link></li>
             <li><Link to="/datanode"><FontAwesomeIcon icon={faDotCircle} /><span>DataNode</span></Link></li>
             <li><Link to="/settings"><FontAwesomeIcon icon={faCog} /><span>Settings</span></Link></li>
-            <li><Link to="/atoms"><FontAwesomeIcon icon={faCog} /><span>Atoms</span></Link></li>
           </ul>
         </nav>
       </div>

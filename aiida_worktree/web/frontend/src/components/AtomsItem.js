@@ -17,12 +17,6 @@ function AtomsItem({ data }) {
       const bjs = new BlendJS(atomsContainerRef.current);
       // Create an instance of AtomsViewer and pass the Atoms object to it
       const avr = new AtomsViewer(bjs, atoms);
-      atoms.translate([3, 3, 3]);
-      atoms.setCell([10, 10, 10]);
-      console.log("atoms: ", atoms)
-      const avr1 = new AtomsViewer(bjs, atoms);
-
-
       // Call the render method to start the visualization
       bjs.render();
 

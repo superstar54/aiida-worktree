@@ -7,7 +7,6 @@ import WorkTreeItem from './components/WorkTreeItem';
 import DataNodeItem from './components/DataNodeItem';
 import Settings from './components/Settings';
 import Layout from './components/Layout'; // Import the Layout component
-import AtomsItem from './components/AtomsItem'; // Import the AtomsItem component
 
 import './App.css';
 
@@ -20,7 +19,6 @@ function App() {
             <Route path="/worktree" element={<WorkTreeTable />} />
             <Route path="/datanode" element={<DataNodeTable />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/atoms" element={<AtomsItem />} /> {/* Use the AtomsItem component */}
             <Route path="/" element={<Home />} />
             <Route path="/worktree/:pk" element={<WorkTreeItem />} />
             <Route path="/datanode/:pk" element={<DataNodeItem />} />
