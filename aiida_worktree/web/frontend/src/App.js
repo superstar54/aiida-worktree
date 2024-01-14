@@ -2,8 +2,9 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './components/Home';
 import WorkTreeTable from './components/WorkTreeTable';
-import Data from './components/Data';
+import DataNodeTable from './components/DataNodeTable';
 import WorkTreeItem from './components/WorkTreeItem';
+import DataNodeItem from './components/DataNodeItem';
 import Settings from './components/Settings';
 import Layout from './components/Layout'; // Import the Layout component
 import AtomsItem from './components/AtomsItem'; // Import the AtomsItem component
@@ -17,11 +18,12 @@ function App() {
         <Layout> {/* Wrap the routes with the Layout component */}
           <Routes>
             <Route path="/worktree" element={<WorkTreeTable />} />
-            <Route path="/data" element={<Data />} />
+            <Route path="/datanode" element={<DataNodeTable />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/atoms" element={<AtomsItem />} /> {/* Use the AtomsItem component */}
             <Route path="/" element={<Home />} />
             <Route path="/worktree/:pk" element={<WorkTreeItem />} />
+            <Route path="/datanode/:pk" element={<DataNodeItem />} />
           </Routes>
         </Layout>
       </div>
