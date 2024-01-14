@@ -1,0 +1,14 @@
+/* CSS for the container element that holds the viewer and GUI */
+#containerElement {
+    position: relative; /* Make sure it's positioned relative to its parent */
+    width: 100%; /* Set the width to 100% or a specific size */
+    height: 100%; /* Set the height to 100% or a specific size */
+}
+
+/* CSS for the GUI container */
+#guiContainer {
+    position: absolute; /* Position the GUI container absolutely within the parent */
+    top: 10px; /* Adjust top and left values to position the GUI as needed */
+    left: 10px;
+    z-index: 1000; /* Set a higher z-index to ensure it appears above other elements */
+}
