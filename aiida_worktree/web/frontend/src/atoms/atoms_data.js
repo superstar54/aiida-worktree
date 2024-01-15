@@ -133,4 +133,12 @@ const covalentRadii = {
     At: 1.50, Rn: 1.50, Fr: 2.60, Ra: 2.21, Ac: 2.15, Th: 2.06, Pa: 2.00, U: 1.96, Np: 1.90, Pu: 1.87,
     Am: 1.80, Cm: 1.69,};
 
-export { elementColors, covalentRadii };
+
+const elementsWithPolyhedra = [
+    "Ti", "Zr", "Hf", "Cr", "Mo", "W", "V", "Fe", "Co", "Ni", "Cu", "Zn", "Ga", "Ge", "As", "Se", "Sr", "Y", "Zr",
+    "Nb", "Ru", "Rh", "Pd", "Ag", "Cd", "In", "Sn", "Sb", "Te", "Ba", "La", "Ce", "Pr", "Nd", "Sm", "Eu", "Gd", "Tb",
+    "Dy", "Ho", "Er", "Tm", "Yb", "Lu", "Hg", "Tl", "Pb", "Bi"
+];
+
+
+export { elementColors, covalentRadii, elementsWithPolyhedra };

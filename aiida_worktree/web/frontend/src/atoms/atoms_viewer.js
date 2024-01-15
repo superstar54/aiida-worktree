@@ -8,6 +8,7 @@ import { createViewpointButtons } from './viewpoint.js';
 import { setupCameraGUI } from './camera.js';
 import { clearObjects } from './utils.js';
 import { drawAtomLabels } from './draw_label.js';
+import {drawPolyhedra} from './polyhedra.js';
 
 class AtomsViewer {
     constructor(tjs, atoms) {
@@ -138,14 +139,16 @@ class AtomsViewer {
 
 
         if ( value == 0 ) {
-            console.log("value: ", value)
-            console.log("this.tjs.scene: ", this.tjs.scene)
-            console.log("this.atoms: ", this.atoms)
             this.instancedMeshes = drawAtoms(this.tjs.scene, this.atoms, 1);
         }
         else if ( value == 1 ){
             this.instancedMeshes = drawAtoms(this.tjs.scene, this.atoms, 0.4);
             drawBonds(this.tjs.scene, this.atoms);
+        }
+        else if ( value == 2 ){
+            this.instancedMeshes = drawAtoms(this.tjs.scene, this.atoms, 0.4);
+            drawBonds(this.tjs.scene, this.atoms);
+            drawPolyhedra(this.tjs.scene, this.atoms);
         }
         else {
             drawBonds(this.tjs.scene, this.atoms);
@@ -187,7 +190,8 @@ class AtomsViewer {
         this.VIZ_TYPE = {
             'Ball': 0,
             'Ball + Stick': 1,
-            'Stick': 2,
+            'Polyhedra': 2,
+            'Stick': 3,
         };
         this.labelType = 'none'; // Default label type
         this.atomScale = 0.4; // Default atom scale
@@ -207,7 +211,7 @@ class AtomsViewer {
 
         // Append the dat.GUI's DOM element to container
         const atomsFolder = gui.addFolder('Atoms');
-		atomsFolder.add( {vizType: 1,}, 'vizType', this.VIZ_TYPE ).onChange( this.changeVizType.bind(this) ).name("Model Style");
+		atomsFolder.add( {vizType: 2,}, 'vizType', this.VIZ_TYPE ).onChange( this.changeVizType.bind(this) ).name("Model Style");
         // Add Label Type Controller
         atomsFolder.add(this, 'labelType', ['none', 'symbol', 'index']).onChange(this.updateLabels.bind(this)).name('Atom Label');
         // Add Atom Scale Controller
@@ -234,11 +238,7 @@ class AtomsViewer {
         drawUnitCell(this.tjs.scene, this.atoms);
         drawUnitCellVectors(this.tjs.scene, this.atoms.cell, this.tjs.camera);
 
-        // Draw atoms
-        this.instancedMeshes = drawAtoms(this.tjs.scene, this.atoms);
-
-        // Draw bonds
-        drawBonds(this.tjs.scene, this.atoms);
+        this.changeVizType(2)
 
         drawAtomLabels(this.tjs.scene, this.atoms, 'none', this.atomLabels);
 

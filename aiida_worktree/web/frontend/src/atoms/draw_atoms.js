@@ -1,13 +1,14 @@
 import * as THREE from 'three';
 import { covalentRadii, elementColors } from './atoms_data.js';
 
+const defaultColor = 0xffffff;
+
 export function drawAtoms(scene, atoms, scale=0.4) {
     // Create instanced meshes for each species
     let instancedMeshes = {};
     Object.entries(atoms.species).forEach(([symbol, species], speciesIndex) => {
         const radius = covalentRadii[symbol] || 1;
         const atomGeometry = new THREE.SphereGeometry(radius*scale, 32, 32);
-        const defaultColor = 0xffffff;
         const color = symbol in elementColors ? elementColors[symbol] : defaultColor;
         const sphereMaterial = new THREE.MeshPhongMaterial({
             color: color,
