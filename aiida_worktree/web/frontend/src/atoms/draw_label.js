@@ -16,7 +16,6 @@ export function createLabel(text, position, color = 'black') {
 
 export function drawAtomLabels(scene, atoms, type = 'symbol', labels = []) {
     // Iterate over atoms and update labels
-    console.log("labels", labels)
     // Clear existing labels
     if (labels && labels.length > 0) {
         labels.forEach(label => {

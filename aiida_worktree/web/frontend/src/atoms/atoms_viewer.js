@@ -6,7 +6,7 @@ import { drawBonds } from './bond.js';
 import { drawAtoms } from './draw_atoms.js';
 import { createViewpointButtons } from './viewpoint.js';
 import { setupCameraGUI } from './camera.js';
-import { clearObjects } from './utils.js';
+import { clearObjects, createHighlight } from './utils.js';
 import { drawAtomLabels } from './draw_label.js';
 import {drawPolyhedra} from './polyhedra.js';
 
@@ -15,7 +15,10 @@ class AtomsViewer {
         this.tjs = tjs
         this.atoms = atoms;
         this.uuid = THREE.MathUtils.generateUUID(); // Generate and assign a UUID
-        this.atoms.uuid = this.uuid
+        this.atoms.uuid = this.uuid;
+        this.selectedAtoms = new Set(); // Store selected atoms
+        this.selectedAtomMesh = new THREE.Group(); // Create a group for highlighted atoms
+        this.tjs.scene.add(this.selectedAtomMesh); // Add it to the scene
         this.init();
     }
 
@@ -50,10 +53,8 @@ class AtomsViewer {
         // Update the picking ray
         raycaster.setFromCamera(mouse, this.tjs.camera);
 
-        // Check for intersections with atom meshes
-        const atomMeshes = Object.values(this.instancedMeshes);
-        const intersects = raycaster.intersectObjects(atomMeshes);
-        // console.log("intersects: ", intersects)
+        // Check for intersections with atom mesh
+        const intersects = raycaster.intersectObject(this.instancedMesh);
         // Check if there are intersections
         if (intersects.length > 0) {
             // Get the first intersected object (atom)
@@ -63,6 +64,12 @@ class AtomsViewer {
             if (selectedObject.userData && selectedObject.userData.type === 'atom') {
                 // Get the instance index of the selected atom
                 const instanceIndex = intersects[0].instanceId;
+                if (this.selectedAtoms.has(instanceIndex)) {
+                    // If the atom is already selected, skip
+                    return;
+                }
+                // Add the instance index to the selectedAtoms set
+                this.selectedAtoms.add(instanceIndex);
 
                 // Get the position of the selected atom in the 3D space
                 const matrix = new THREE.Matrix4();
@@ -71,22 +78,38 @@ class AtomsViewer {
                 const quaternion = new THREE.Quaternion();
                 const scale = new THREE.Vector3();
                 matrix.decompose(position, quaternion, scale);
-
                 // Display the symbol of the atom on top of it
-                this.createAtomLabel(selectedObject.userData.symbol, position);
+                this.createAtomLabel(this.atoms.species[this.atoms.speciesArray[instanceIndex]].symbol, position);
+
+                // Create a new mesh for the highlighted atom
+                const highlightedAtomMesh = createHighlight(position, scale)
+                // Add the highlighted atom mesh to the selectedAtomMesh group
+                this.selectedAtomMesh.add(highlightedAtomMesh);
             } else {
                 // Clear the HTML element when nothing is selected
                 this.clearAtomLabel();
+                this.selectedAtoms.clear();
+                this.clearHighlight();
             }
         } else {
             // Clear the HTML element when nothing is selected
             this.clearAtomLabel();
+            this.selectedAtoms.clear();
+            this.clearHighlight();
         }
     }
 
     clearAtomLabel() {
         if (this.label) {
             this.label.element.textContent = '';
+        }
+    }
+
+    clearHighlight() {
+        // Remove highlighted atom meshes from the selectedAtomMesh group
+        while (this.selectedAtomMesh.children.length > 0) {
+            const child = this.selectedAtomMesh.children[0]; // Get the first child
+            this.selectedAtomMesh.remove(child); // Remove the child from the group
         }
     }
 
@@ -127,7 +150,6 @@ class AtomsViewer {
             // Draw labels with indices
             this.atomLabels = drawAtomLabels(this.tjs.scene, this.atoms, 'index', this.atomLabels);
         }
-        console.log("this.atomLabels: ", this.atomLabels)
     }
 
     changeVizType( value ) {
@@ -139,14 +161,14 @@ class AtomsViewer {
 
 
         if ( value == 0 ) {
-            this.instancedMeshes = drawAtoms(this.tjs.scene, this.atoms, 1);
+            this.instancedMesh = drawAtoms(this.tjs.scene, this.atoms, 1);
         }
         else if ( value == 1 ){
-            this.instancedMeshes = drawAtoms(this.tjs.scene, this.atoms, 0.4);
+            this.instancedMesh = drawAtoms(this.tjs.scene, this.atoms, 0.4);
             drawBonds(this.tjs.scene, this.atoms);
         }
         else if ( value == 2 ){
-            this.instancedMeshes = drawAtoms(this.tjs.scene, this.atoms, 0.4);
+            this.instancedMesh = drawAtoms(this.tjs.scene, this.atoms, 0.4);
             drawBonds(this.tjs.scene, this.atoms);
             drawPolyhedra(this.tjs.scene, this.atoms);
         }
@@ -162,8 +184,8 @@ class AtomsViewer {
         const rotation = new THREE.Quaternion();
         const scale = new THREE.Vector3();
 
-        for (let species in this.instancedMeshes) {
-            let mesh = this.instancedMeshes[species];
+        for (let species in this.instancedMesh) {
+            let mesh = this.instancedMesh[species];
             for (let i = 0; i < mesh.count; i++) {
                 const instanceMatrix = new THREE.Matrix4();
                 mesh.getMatrixAt(i, instanceMatrix); // Get the original matrix of the instance
@@ -184,15 +206,29 @@ class AtomsViewer {
         // Re-render the scene if necessary
     }
 
+    // Method to delete selected atoms
+    deleteSelectedAtoms() {
+        // Remove the selected atoms from the scene and data
+        this.atoms.deleteAtoms(Array.from(this.selectedAtoms));
+        // Clear the selection
+        this.selectedAtoms.clear();
+
+        // Update the visualization
+        this.changeVizType(this.vizType); // Reapply the visualization
+        this.clearAtomLabel(); // Clear the atom label
+        this.clearHighlight();
+    }
+
 
     init() {
         this.atomLabels = [];
-        this.VIZ_TYPE = {
+        this.VIZ_TYPE_MAP = {
             'Ball': 0,
             'Ball + Stick': 1,
             'Polyhedra': 2,
             'Stick': 3,
         };
+        this.vizType = 1; // Default viz type
         this.labelType = 'none'; // Default label type
         this.atomScale = 0.4; // Default atom scale
         // Initialize Three.js scene, camera, and renderer
@@ -211,7 +247,7 @@ class AtomsViewer {
 
         // Append the dat.GUI's DOM element to container
         const atomsFolder = gui.addFolder('Atoms');
-		atomsFolder.add( {vizType: 2,}, 'vizType', this.VIZ_TYPE ).onChange( this.changeVizType.bind(this) ).name("Model Style");
+		atomsFolder.add( {vizType: this.vizType,}, 'vizType', this.VIZ_TYPE_MAP ).onChange( this.changeVizType.bind(this) ).name("Model Style");
         // Add Label Type Controller
         atomsFolder.add(this, 'labelType', ['none', 'symbol', 'index']).onChange(this.updateLabels.bind(this)).name('Atom Label');
         // Add Atom Scale Controller
@@ -228,27 +264,28 @@ class AtomsViewer {
         this.isMouseDown = false;
         this.mouseDownPosition = new THREE.Vector2();
         // Bind event handlers
-        document.addEventListener('pointerdown', this.onMouseDown.bind(this), false);
-        document.addEventListener('pointerup', this.onMouseUp.bind(this), false);
-        document.addEventListener('click', this.onMouseClick.bind(this), false);
-
-
+        this.tjs.containerElement.addEventListener('pointerdown', this.onMouseDown.bind(this), false);
+        this.tjs.containerElement.addEventListener('pointerup', this.onMouseUp.bind(this), false);
+        this.tjs.containerElement.addEventListener('click', this.onMouseClick.bind(this), false);
+        // Add event listeners for keypress events
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Delete') {
+                // When 'X' key is pressed, delete selected atoms
+                this.deleteSelectedAtoms();
+            }
+        });
 
         // Draw unit cell
         drawUnitCell(this.tjs.scene, this.atoms);
         drawUnitCellVectors(this.tjs.scene, this.atoms.cell, this.tjs.camera);
 
-        this.changeVizType(2)
+        this.changeVizType(this.vizType)
 
         drawAtomLabels(this.tjs.scene, this.atoms, 'none', this.atomLabels);
 
         // Set camera position
         this.tjs.camera.position.z = 5;
 
-        // Update the instance matrix after all changes
-        Object.values(this.instancedMeshes).forEach(instancedMesh => instancedMesh.instanceMatrix.needsUpdate = true);
-
-        // Add event listeners or additional visualization elements as needed
     }
 
 }

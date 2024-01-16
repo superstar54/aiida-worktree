@@ -28,7 +28,6 @@ export function drawBonds(scene, atoms) {
 
 export function calculateBonds(atoms) {
     const neighbors = findNeighbors(atoms);
-    console.log("neighbors: ", neighbors)
     const bondsData = buildBonds(neighbors);
     return bondsData;
 }

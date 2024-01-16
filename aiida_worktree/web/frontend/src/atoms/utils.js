@@ -79,3 +79,24 @@ export function clearObjects(scene, uuid=null) {
         }
     });
 }
+
+
+export function createHighlight(position, scale) {
+    const highlightGeometry = new THREE.SphereGeometry(1, 32, 32); // Unit sphere
+    const highlightMaterial = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(0xffff00), // Yellow color
+        transparent: true, // Make it transparent
+        opacity: 0.2, // Set the transparency level (0.0 to 1.0)
+    });
+    const scaleMultiplier = 1.1; // Adjust the scale factor as needed (1.1 makes it slightly larger)
+    const highlightedAtomMesh = new THREE.Mesh(highlightGeometry, highlightMaterial);
+    highlightedAtomMesh.position.copy(position)
+    // Scale the highlighted atom mesh
+    highlightedAtomMesh.scale.set(
+        scale.x * scaleMultiplier,
+        scale.y * scaleMultiplier,
+        scale.z * scaleMultiplier
+    );
+    console.log("highlightedAtomMesh: ", highlightedAtomMesh)
+    return highlightedAtomMesh
+}

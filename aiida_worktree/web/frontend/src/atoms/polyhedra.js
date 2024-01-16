@@ -29,7 +29,7 @@ export function drawPolyhedra(scene, atoms) {
             opacity: 0.8,      // Set the opacity value (0.0 to 1.0, where 0.0 is fully transparent and 1.0 is fully opaque)
         });
 		const mesh = new THREE.Mesh( geometry, material );
-        mesh.userData.type = 'bond';
+        mesh.userData.type = 'polyhedra';
         mesh.userData.symbol = symbol;
         mesh.userData.uuid = atoms.uuid;
 		scene.add( mesh );

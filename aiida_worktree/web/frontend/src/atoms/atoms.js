@@ -269,6 +269,25 @@ class Atoms {
             }
         }
     }
+    deleteAtoms(indices) {
+        // Sort the indices in descending order to avoid index shifting
+        indices.sort((a, b) => b - a);
+
+        for (const index of indices) {
+            if (index >= 0 && index < this.positions.length) {
+                this.positions.splice(index, 1); // Remove the atom's position data
+                this.speciesArray.splice(index, 1); // Remove the atom's species index
+            }
+        }
+    }
+    replaceAtoms(indices, newSpeciesSymbol) {
+        for (const index of indices) {
+            if (index >= 0 && index < this.speciesArray.length) {
+                // Replace the species of the atom at the specified index
+                this.speciesArray[index] = this.species[newSpeciesSymbol].atomicNumber;
+            }
+        }
+    }
 
 }
 
