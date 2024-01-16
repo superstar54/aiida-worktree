@@ -285,6 +285,29 @@ class AtomsViewer {
 
         // Set camera position
         this.tjs.camera.position.z = 5;
+        // Full screen button
+        const fullscreenButton = document.createElement('button');
+        fullscreenButton.innerHTML = '<i class="fas fa-expand"></i>'; // Font Awesome expand icon
+        fullscreenButton.style.position = 'absolute';
+        fullscreenButton.style.right = '10px';
+        fullscreenButton.style.top = '10px';
+        fullscreenButton.style.zIndex = 1000; // Make sure it's above other elements
+
+        // Append the button to the container
+        this.tjs.containerElement.appendChild(fullscreenButton);
+
+        // Event listener for the fullscreen button
+        fullscreenButton.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                this.tjs.containerElement.requestFullscreen().catch(err => {
+                    alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                });
+                fullscreenButton.innerHTML = '<i class="fas fa-compress"></i>'; // Change to compress icon
+            } else {
+                document.exitFullscreen();
+                fullscreenButton.innerHTML = '<i class="fas fa-expand"></i>'; // Change back to expand icon
+            }
+        });
 
     }
 

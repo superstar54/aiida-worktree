@@ -67,8 +67,12 @@ export class BlendJS {
         this.camera = new THREE.PerspectiveCamera(50, this.containerElement.clientWidth / this.containerElement.clientHeight, 1, 500);
         // Create a light
         const light = new THREE.DirectionalLight( 0xffffff, 2.5 );
+        light.position.set( 1, 1, 1 );
         this.addLight('MainLight', light);
-        const ambientLight = new THREE.AmbientLight(0x404040, 10); // Soft white light
+        const light1 = new THREE.DirectionalLight( 0xffffff, 2.5 );
+        light1.position.set( 1, 1, -1 );
+        this.addLight('MainLight', light);
+        const ambientLight = new THREE.AmbientLight(0x404040, 20); // Soft white light
         this.addLight('AmbientLight', ambientLight);
         // OrbitControls for camera movement
         this.controls = new OrbitControls(this.camera, renderer.domElement);

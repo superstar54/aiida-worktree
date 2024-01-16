@@ -9,8 +9,9 @@ export function drawAtoms(scene, atoms, scale = 0.4) {
     const atomGeometry = new THREE.SphereGeometry(1, 32, 32); // Unit sphere
     const material = new THREE.MeshPhongMaterial({
         color: defaultColor,
-        specular: 0x111111,
-        shininess: 50,
+        specular: 0x222222,
+        shininess: 100,
+        reflectivity: 0.9, // Reflectivity strength for the environment map
     });
 
     // Create a single instanced mesh for all atoms
