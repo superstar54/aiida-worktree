@@ -37,20 +37,6 @@ export function findNeighbors(atoms) {
     return neighbors;
 }
 
-export function buildBonds(neighbors) {
-    const bonds = [];
-
-    for (let i = 0; i < neighbors.length; i++) {
-        for (const neighborIndex of neighbors[i]) {
-            if (neighborIndex > i) {
-                bonds.push([i, neighborIndex]); // Add a bond between atom i and its neighbor
-            }
-        }
-    }
-
-    return bonds;
-}
-
 export function clearObjects(scene, uuid=null) {
     // Clone the children array since we'll be modifying it as we go
     const children = [...scene.children];

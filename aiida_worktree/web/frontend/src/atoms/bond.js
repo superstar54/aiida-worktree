@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {elementColors } from './atoms_data.js';
-import {findNeighbors, buildBonds } from './utils.js';
+import {findNeighbors } from './utils.js';
 
 
 export function drawBonds(scene, atoms) {
@@ -32,6 +32,19 @@ export function calculateBonds(atoms) {
     return bondsData;
 }
 
+export function buildBonds(neighbors) {
+    const bonds = [];
+
+    for (let i = 0; i < neighbors.length; i++) {
+        for (const neighborIndex of neighbors[i]) {
+            if (neighborIndex > i) {
+                bonds.push([i, neighborIndex]); // Add a bond between atom i and its neighbor
+            }
+        }
+    }
+
+    return bonds;
+}
 
 export function createSingleBondSegment(start, end, radius, material) {
     const direction = new THREE.Vector3().subVectors(end, start);

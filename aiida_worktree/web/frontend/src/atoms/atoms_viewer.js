@@ -184,25 +184,19 @@ class AtomsViewer {
         const rotation = new THREE.Quaternion();
         const scale = new THREE.Vector3();
 
-        for (let species in this.instancedMesh) {
-            let mesh = this.instancedMesh[species];
-            for (let i = 0; i < mesh.count; i++) {
-                const instanceMatrix = new THREE.Matrix4();
-                mesh.getMatrixAt(i, instanceMatrix); // Get the original matrix of the instance
-
-                // Decompose the original matrix into its components
-                instanceMatrix.decompose(position, rotation, scale);
-
-                // Set the scale to the new value
-                scale.set(this.atomScale, this.atomScale, this.atomScale);
-
-                // Recompose the matrix with the new scale
-                instanceMatrix.compose(position, rotation, scale);
-
-                mesh.setMatrixAt(i, instanceMatrix);
-            }
-            mesh.instanceMatrix.needsUpdate = true;
+        let mesh = this.instancedMesh
+        for (let i = 0; i < mesh.count; i++) {
+            const instanceMatrix = new THREE.Matrix4();
+            mesh.getMatrixAt(i, instanceMatrix); // Get the original matrix of the instance
+            // Decompose the original matrix into its components
+            instanceMatrix.decompose(position, rotation, scale);
+            // Set the scale to the new value
+            scale.set(this.atomScale, this.atomScale, this.atomScale);
+            // Recompose the matrix with the new scale
+            instanceMatrix.compose(position, rotation, scale);
+            mesh.setMatrixAt(i, instanceMatrix);
         }
+        mesh.instanceMatrix.needsUpdate = true;
         // Re-render the scene if necessary
     }
 
